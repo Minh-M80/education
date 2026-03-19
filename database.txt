@@ -1,0 +1,258 @@
+-- MySQL Script for Education Project
+
+CREATE DATABASE IF NOT EXISTS education;
+USE education;
+
+-- 1. Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    avatar VARCHAR(255),
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Courses Table
+CREATE TABLE IF NOT EXISTS courses (
+    id VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    instructor VARCHAR(255),
+    thumbnail VARCHAR(255),
+    price DECIMAL(15,2) DEFAULT 0,
+    duration VARCHAR(50),
+    level ENUM('Beginner', 'Intermediate', 'Advanced'),
+    category VARCHAR(100),
+    rating DECIMAL(3,1) DEFAULT 0,
+    total_students INT DEFAULT 0,
+    total_lessons INT DEFAULT 0
+);
+
+-- 3. Lessons Table
+-- video_url hỗ trợ 2 dạng:
+--   YouTube embed: https://www.youtube.com/embed/{videoId}
+--   Video tự upload: /videos/{filename}.mp4  (đặt trong thư mục static/videos của backend)
+CREATE TABLE IF NOT EXISTS lessons (
+    id VARCHAR(255) PRIMARY KEY,
+    course_id VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration VARCHAR(50),
+    video_url VARCHAR(500),
+    video_type ENUM('youtube', 'upload') DEFAULT 'youtube',
+    lesson_order INT DEFAULT 0,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- 4. Enrollments Table
+CREATE TABLE IF NOT EXISTS enrollments (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    course_id VARCHAR(255) NOT NULL,
+    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    progress DECIMAL(5,2) DEFAULT 0,
+    status ENUM('active', 'completed') DEFAULT 'active',
+    completed_lessons TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- 5. Quizzes Table
+CREATE TABLE IF NOT EXISTS quizzes (
+    id VARCHAR(255) PRIMARY KEY,
+    lesson_id VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    duration_minutes INT DEFAULT 0,
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+);
+
+-- 6. Quiz Questions Table
+CREATE TABLE IF NOT EXISTS quiz_questions (
+    id VARCHAR(255) PRIMARY KEY,
+    quiz_id VARCHAR(255) NOT NULL,
+    question TEXT NOT NULL,
+    options JSON NOT NULL,
+    correct_answer INT NOT NULL,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
+
+-- 7. Quiz Results Table (NEW)
+-- Lưu kết quả nộp bài quiz của từng user
+CREATE TABLE IF NOT EXISTS quiz_results (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    quiz_id VARCHAR(255) NOT NULL,
+    score INT NOT NULL DEFAULT 0,
+    total_questions INT NOT NULL DEFAULT 0,
+    answers JSON,                          -- mảng index đáp án user chọn, vd: [0, 1, 3]
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
+
+-- 8. Lesson Progress Table (NEW)
+-- Theo dõi từng bài học user đã xem / hoàn thành
+CREATE TABLE IF NOT EXISTS lesson_progress (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    lesson_id VARCHAR(255) NOT NULL,
+    course_id VARCHAR(255) NOT NULL,
+    watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_user_lesson (user_id, lesson_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- 9. Assignments Table
+CREATE TABLE IF NOT EXISTS assignments (
+    id VARCHAR(255) PRIMARY KEY,
+    lesson_id VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    due_date DATETIME,
+    max_file_size_mb INT DEFAULT 10,
+    allowed_formats VARCHAR(255),
+    max_score INT DEFAULT 100,
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+);
+
+-- 10. Exercises Table
+CREATE TABLE IF NOT EXISTS exercises (
+    id VARCHAR(255) PRIMARY KEY,
+    lesson_id VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    type ENUM('coding', 'fill-blank', 'short-answer') NOT NULL,
+    time_limit_minutes INT,
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+);
+
+-- 10.1 Exercise Questions Table
+CREATE TABLE IF NOT EXISTS exercise_questions (
+    id VARCHAR(255) PRIMARY KEY,
+    exercise_id VARCHAR(255) NOT NULL,
+    question TEXT NOT NULL,
+    type ENUM('coding', 'fill-blank', 'short-answer') NOT NULL,
+    placeholder TEXT,
+    expected_answer TEXT,
+    hints JSON,
+    points INT DEFAULT 0,
+    FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+);
+
+-- 11. Reviews Table
+CREATE TABLE IF NOT EXISTS reviews (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    course_id VARCHAR(255) NOT NULL,
+    rating INT CHECK(rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_name VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- ============================================================
+-- INITIAL MOCK DATA
+-- ============================================================
+
+-- Insert test users
+INSERT INTO users (id, email, full_name, password) VALUES ('u1', 'test@example.com', 'Test User', 'password123');
+INSERT INTO users (id, email, full_name, password) VALUES ('u2', 'admin@example.com', 'Admin User', 'password123');
+INSERT INTO users (id, email, full_name, password) VALUES ('u3', 'student@example.com', 'Student User', 'password123');
+
+-- Insert Course 1: Web Development
+INSERT INTO courses (id, title, description, instructor, thumbnail, price, duration, level, category, rating, total_students, total_lessons) 
+VALUES ('1', 'Complete Web Development Bootcamp', 'Master HTML, CSS, JavaScript, React, Node.js and more.', 'Dr. Angela Yu', 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80', 1999000, '52 hours', 'Beginner', 'Web Development', 4.8, 15420, 5);
+
+-- Lessons for Course 1 — video_url dùng YouTube embed (video thực tế có thể xem được)
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l1', '1', 'Introduction to Web Development', 'Tổng quan về công nghệ web: HTML, CSS, JavaScript, cách trình duyệt hoạt động và lộ trình học.', '15 min', 'https://www.youtube.com/embed/ysEN5RaKOlA', 'youtube', 1);
+
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l2', '1', 'HTML Fundamentals', 'Học cấu trúc HTML, các thẻ phổ biến, form, table và semantic HTML5.', '45 min', 'https://www.youtube.com/embed/kUMe1FH4CHE', 'youtube', 2);
+
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l3', '1', 'CSS Styling Basics', 'Học CSS: selector, box model, flexbox, grid và responsive design.', '50 min', 'https://www.youtube.com/embed/OXGznpKZ_sA', 'youtube', 3);
+
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l4', '1', 'JavaScript Essentials', 'Các khái niệm nền tảng JS: biến, hàm, array, object, DOM manipulation.', '60 min', 'https://www.youtube.com/embed/PkZNo7MFNFg', 'youtube', 4);
+
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l5', '1', 'React Introduction', 'Tìm hiểu React: component, props, state, hooks và xây dựng UI hiện đại.', '55 min', 'https://www.youtube.com/embed/bMknfKXIFA8', 'youtube', 5);
+
+-- Insert Course 2: Data Science
+INSERT INTO courses (id, title, description, instructor, thumbnail, price, duration, level, category, rating, total_students, total_lessons) 
+VALUES ('2', 'Data Science & Machine Learning', 'Learn Python, Data Analysis, Machine Learning, and AI.', 'Prof. Andrew Ng', 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80', 2499000, '68 hours', 'Intermediate', 'Data Science', 4.9, 23150, 4);
+
+-- Lessons for Course 2
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l6', '2', 'Introduction to Data Science', 'Data Science là gì? Ứng dụng thực tế và roadmap học tập.', '20 min', 'https://www.youtube.com/embed/ua-CiDNNj30', 'youtube', 1);
+
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l7', '2', 'Python for Data Analysis', 'Cơ bản Python cho Data Science: cú pháp, list, dict, vòng lặp.', '50 min', 'https://www.youtube.com/embed/rfscVS0vtbw', 'youtube', 2);
+
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l8', '2', 'Pandas & NumPy', 'Thao tác dữ liệu với Pandas DataFrame và tính toán số với NumPy.', '60 min', 'https://www.youtube.com/embed/vmEHCJofslg', 'youtube', 3);
+
+INSERT INTO lessons (id, course_id, title, description, duration, video_url, video_type, lesson_order)
+VALUES ('l9', '2', 'Machine Learning Basics', 'Giới thiệu ML: supervised learning, linear regression, classification.', '45 min', 'https://www.youtube.com/embed/Gv9_4yMHFhI', 'youtube', 4);
+
+-- Insert Reviews
+INSERT INTO reviews (id, user_id, course_id, rating, comment, user_name) VALUES ('r1', 'u1', '1', 5, 'Excellent course! The instructor explains everything clearly. Highly recommended for beginners.', 'Nguyen Van A');
+INSERT INTO reviews (id, user_id, course_id, rating, comment, user_name) VALUES ('r2', 'u2', '1', 4, 'Great content and practical projects. Wish there were more advanced topics.', 'Tran Thi B');
+INSERT INTO reviews (id, user_id, course_id, rating, comment, user_name) VALUES ('r3', 'u3', '2', 5, 'Prof. Andrew Ng is amazing! The best ML course I have ever taken.', 'Le Van C');
+
+-- Insert Quizzes
+INSERT INTO quizzes (id, lesson_id, title, duration_minutes) VALUES ('q1', 'l2', 'HTML Fundamentals Quiz', 15);
+INSERT INTO quizzes (id, lesson_id, title, duration_minutes) VALUES ('q2', 'l4', 'JavaScript Essentials Quiz', 20);
+
+-- Insert Quiz Questions
+INSERT INTO quiz_questions (id, quiz_id, question, options, correct_answer) VALUES ('qq1', 'q1', 'What does HTML stand for?', '["Hyper Text Markup Language", "High Tech Modern Language", "Hyper Transfer Markup Language", "Home Tool Markup Language"]', 0);
+INSERT INTO quiz_questions (id, quiz_id, question, options, correct_answer) VALUES ('qq2', 'q1', 'Which tag is used to create a hyperlink?', '["<link>", "<a>", "<href>", "<url>"]', 1);
+INSERT INTO quiz_questions (id, quiz_id, question, options, correct_answer) VALUES ('qq3', 'q1', 'Which HTML element defines the title of a document?', '["<meta>", "<header>", "<title>", "<head>"]', 2);
+INSERT INTO quiz_questions (id, quiz_id, question, options, correct_answer) VALUES ('qq4', 'q2', 'Which keyword is used to declare a variable in JavaScript?', '["var", "let", "const", "All of the above"]', 3);
+INSERT INTO quiz_questions (id, quiz_id, question, options, correct_answer) VALUES ('qq5', 'q2', 'Which method is used to print to the console?', '["console.log()", "print()", "document.write()", "alert()"]', 0);
+INSERT INTO quiz_questions (id, quiz_id, question, options, correct_answer) VALUES ('qq6', 'q2', 'What is the correct syntax for a JavaScript arrow function?', '["function() => {}", "() => {}", "=> () {}", "func() {}"]', 1);
+
+-- Insert Assignments
+INSERT INTO assignments (id, lesson_id, title, description, due_date, max_file_size_mb, allowed_formats, max_score) VALUES ('a1', 'l3', 'Bài tập CSS: Thiết kế Landing Page', 'Sử dụng CSS để thiết kế một landing page hoàn chỉnh theo mẫu đã cho. Bao gồm header, hero section, features và footer.', '2025-12-31 23:59:59', 10, 'html,css,zip', 100);
+INSERT INTO assignments (id, lesson_id, title, description, due_date, max_file_size_mb, allowed_formats, max_score) VALUES ('a2', 'l5', 'Bài tập React: Xây dựng Todo App', 'Xây dựng ứng dụng Todo List sử dụng React với các chức năng thêm, sửa, xóa và đánh dấu hoàn thành.', '2025-12-31 23:59:59', 20, 'zip,rar', 100);
+
+-- Insert Exercises
+INSERT INTO exercises (id, lesson_id, title, description, type, time_limit_minutes) VALUES ('e1', 'l2', 'Bài tập thực hành HTML', 'Hoàn thành các bài tập điền code HTML để củng cố kiến thức.', 'fill-blank', 15);
+INSERT INTO exercises (id, lesson_id, title, description, type, time_limit_minutes) VALUES ('e2', 'l4', 'Bài tập lập trình JavaScript', 'Viết các đoạn code JavaScript để giải quyết các bài toán cơ bản.', 'coding', 30);
+
+-- Insert Exercise Questions
+INSERT INTO exercise_questions (id, exercise_id, question, type, placeholder, expected_answer, hints, points)
+VALUES ('eq1', 'e1', 'Thẻ HTML nào dùng để tạo đoạn văn bản?', 'fill-blank', 'Nhập tên thẻ (ví dụ: p)', 'p', '["Đây là viết tắt của paragraph"]', 10);
+
+INSERT INTO exercise_questions (id, exercise_id, question, type, placeholder, expected_answer, hints, points)
+VALUES ('eq2', 'e1', 'Thuộc tính nào dùng để thêm liên kết cho thẻ a?', 'fill-blank', 'Nhập tên thuộc tính', 'href', '["Thuộc tính này chứa URL đích"]', 10);
+
+INSERT INTO exercise_questions (id, exercise_id, question, type, placeholder, expected_answer, hints, points)
+VALUES ('eq3', 'e1', 'Thẻ HTML nào dùng để tạo danh sách không có thứ tự?', 'fill-blank', 'Nhập tên thẻ', 'ul', '["Viết tắt của unordered list"]', 10);
+
+INSERT INTO exercise_questions (id, exercise_id, question, type, placeholder, expected_answer, hints, points)
+VALUES ('eq4', 'e2', 'Viết hàm tính tổng các số từ 1 đến n.', 'coding', 'function sum(n) {\n  // Code của bạn\n}', 'for,let,sum,return,i++', '["Dùng vòng lặp for để cộng dồn", "Tạo biến sum trước khi lặp"]', 25);
+
+INSERT INTO exercise_questions (id, exercise_id, question, type, placeholder, expected_answer, hints, points)
+VALUES ('eq5', 'e2', 'Viết hàm kiểm tra số nguyên tố.', 'coding', 'function isPrime(n) {\n  // Code của bạn\n}', 'for,if,return,true,false,%', '["Kiểm tra chia hết từ 2 đến căn bậc hai của n"]', 30);
+
+INSERT INTO exercise_questions (id, exercise_id, question, type, placeholder, expected_answer, hints, points)
+VALUES ('eq6', 'e2', 'Viết hàm đảo ngược chuỗi.', 'coding', 'function reverseString(str) {\n  // Code của bạn\n}', 'split,reverse,join', '["Có thể dùng split, reverse và join"]', 20);
+
+-- ============================================================
+-- GHI CHÚ SỬ DỤNG VIDEO
+-- ============================================================
+-- Để nhúng video YouTube: video_url = 'https://www.youtube.com/embed/{VIDEO_ID}'
+--   Ví dụ: https://www.youtube.com/embed/PkZNo7MFNFg
+--
+-- Để dùng video tự upload:
+--   1. Đặt file .mp4 vào thư mục: backend/src/main/resources/static/videos/
+--   2. video_url = '/videos/ten-file.mp4'
+--   3. video_type = 'upload'
+--   4. Frontend sẽ tự detect và render <video> tag thay vì <iframe>
