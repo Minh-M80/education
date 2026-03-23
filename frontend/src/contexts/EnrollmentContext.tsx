@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Enrollment } from '@/types/lms';
-import { mockCourses } from '@/data/mockData';
 import { getAuthHeaders } from '@/lib/authFetch';
 import { useAuth } from './AuthContext';
 
@@ -9,7 +8,7 @@ interface EnrollmentContextType {
   isEnrolled: (courseId: string) => boolean;
   enrollCourse: (userId: string, courseId: string) => Promise<Enrollment | null>;
   getEnrollment: (courseId: string) => Enrollment | undefined;
-  updateProgress: (courseId: string, lessonId: string) => void;
+  updateProgress: (courseId: string, lessonId: string) => Promise<void>;
   getProgress: (courseId: string) => number;
   refreshEnrollments: (userId?: string) => Promise<void>;
 }
@@ -32,6 +31,8 @@ const readStoredEnrollments = (): Enrollment[] => {
 
 const normalizeEnrollment = (value: any): Enrollment => ({
   ...value,
+  enrolledAt: value?.enrolledAt ? new Date(value.enrolledAt) : new Date(),
+  progress: Number(value?.progress || 0),
   completedLessons: Array.isArray(value?.completedLessons)
     ? value.completedLessons
     : value?.completedLessons
@@ -54,7 +55,7 @@ const mergeEnrollments = (remote: Enrollment[], local: Enrollment[]) => {
 
 export const EnrollmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>(() => readStoredEnrollments());
+  const [enrollments, setEnrollments] = useState<Enrollment[]>(() => readStoredEnrollments().map(normalizeEnrollment));
 
   const syncEnrollments = useCallback((updater: Enrollment[] | ((prev: Enrollment[]) => Enrollment[])) => {
     setEnrollments(prev => {
@@ -73,9 +74,7 @@ export const EnrollmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     try {
       const res = await fetch(`${API_URL}/enrollments/user/${userId}`, {
-        headers: {
-          ...getAuthHeaders(),
-        },
+        headers: { ...getAuthHeaders() },
       });
       if (!res.ok) {
         throw new Error(`Failed to fetch enrollments for user ${userId}`);
@@ -92,7 +91,6 @@ export const EnrollmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [syncEnrollments, user?.id]);
 
-  // Load enrollments when user changes
   useEffect(() => {
     if (!user?.id) {
       syncEnrollments([]);
@@ -118,11 +116,6 @@ export const EnrollmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       return existing;
     }
 
-    const payload = {
-      userId,
-      courseId
-    };
-
     try {
       const res = await fetch(`${API_URL}/enrollments`, {
         method: 'POST',
@@ -130,17 +123,16 @@ export const EnrollmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           'Content-Type': 'application/json',
           ...getAuthHeaders(),
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ userId, courseId })
       });
 
       if (!res.ok) {
         throw new Error(`Failed to enroll course ${courseId}`);
       }
 
-      const data = await res.json();
-      const newEnrollment = normalizeEnrollment(data);
-      syncEnrollments(prev => prev.some(item => item.userId === userId && item.courseId === courseId) ? prev : [...prev, newEnrollment]);
-      return newEnrollment;
+      const data = normalizeEnrollment(await res.json());
+      syncEnrollments(prev => prev.some(item => item.userId === userId && item.courseId === courseId) ? prev : [...prev, data]);
+      return data;
     } catch (error) {
       const fallbackEnrollment: Enrollment = {
         id: `local-${userId}-${courseId}`,
@@ -155,57 +147,78 @@ export const EnrollmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       console.error('Error enrolling in course, using local fallback:', error);
       return fallbackEnrollment;
     }
-  }, [enrollments]);
+  }, [enrollments, syncEnrollments]);
 
-  const updateProgress = useCallback((courseId: string, lessonId: string) => {
+  const updateProgress = useCallback(async (courseId: string, lessonId: string) => {
     if (!user?.id) return;
-    
+
+    let totalLessons = 1;
+    try {
+      const courseRes = await fetch(`${API_URL}/courses/${courseId}`, {
+        headers: { ...getAuthHeaders() },
+      });
+      if (courseRes.ok) {
+        const courseData = await courseRes.json();
+        totalLessons = Math.max(1, Number(courseData?.totalLessons || 1));
+      }
+    } catch (error) {
+      console.error('Error fetching course lesson count, using fallback:', error);
+    }
+
+    let payloadToSync: { completedLessons: string[]; progress: number; status: 'active' | 'completed' } | null = null;
+
     syncEnrollments(prev => {
       const updated = [...prev];
-      const eIdx = updated.findIndex(e => e.courseId === courseId);
-      
-      if (eIdx !== -1) {
-        const e = updated[eIdx];
-        const completedLessons = e.completedLessons.includes(lessonId)
-          ? e.completedLessons
-          : [...e.completedLessons, lessonId];
-          
-        // Fetch real course data to know total lessons or default to 1 for quick progress 
-        // We will just do a rough estimate or fetch the course from state if we wanted to be perfectly accurate,
-        // but since we are interacting with backend, backend or mockCourses can be used as fallback
-        const course = mockCourses.find(c => c.id === courseId);
-        const totalLessons = course?.lessons?.length || 1;
-        const progressPercent = Math.round((completedLessons.length / totalLessons) * 100);
-        
-        const finalProgress = Math.min(100, progressPercent);
-        const finalStatus = finalProgress >= 100 ? 'completed' : 'active';
-        
-        const updatedEnrollment = {
-          ...e,
-          completedLessons,
-          progress: finalProgress,
-          status: finalStatus
-        };
-        updated[eIdx] = updatedEnrollment as any;
-        
-        // Push update to backend
-        fetch(`${API_URL}/enrollments/progress`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            courseId,
-            completedLessons, // Will be stringified as JSON internally by our API mapping
-            progress: finalProgress,
-            status: finalStatus
-          })
-        }).catch(err => console.error('Error updating progress:', err));
+      const enrollmentIndex = updated.findIndex(e => e.courseId === courseId && e.userId === user.id);
+
+      if (enrollmentIndex === -1) {
+        return prev;
       }
+
+      const currentEnrollment = updated[enrollmentIndex];
+      const completedLessons = currentEnrollment.completedLessons.includes(lessonId)
+        ? currentEnrollment.completedLessons
+        : [...currentEnrollment.completedLessons, lessonId];
+
+      const finalProgress = Math.min(100, Math.round((completedLessons.length / totalLessons) * 100));
+      const finalStatus: 'active' | 'completed' = finalProgress >= 100 ? 'completed' : 'active';
+
+      payloadToSync = {
+        completedLessons,
+        progress: finalProgress,
+        status: finalStatus,
+      };
+
+      updated[enrollmentIndex] = {
+        ...currentEnrollment,
+        completedLessons,
+        progress: finalProgress,
+        status: finalStatus,
+      };
+
       return updated;
     });
+
+    if (!payloadToSync) return;
+
+    try {
+      await fetch(`${API_URL}/enrollments/progress`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          courseId,
+          completedLessons: payloadToSync.completedLessons,
+          progress: payloadToSync.progress,
+          status: payloadToSync.status,
+        })
+      });
+    } catch (error) {
+      console.error('Error updating progress:', error);
+    }
   }, [syncEnrollments, user?.id]);
 
   const getProgress = useCallback((courseId: string) => {
@@ -214,11 +227,11 @@ export const EnrollmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [enrollments]);
 
   return (
-    <EnrollmentContext.Provider value={{ 
-      enrollments, 
-      isEnrolled, 
-      enrollCourse, 
-      getEnrollment, 
+    <EnrollmentContext.Provider value={{
+      enrollments,
+      isEnrolled,
+      enrollCourse,
+      getEnrollment,
       updateProgress,
       getProgress,
       refreshEnrollments

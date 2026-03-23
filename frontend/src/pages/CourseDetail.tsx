@@ -149,9 +149,126 @@ const buildFallbackLessons = (courseId: string): Lesson[] => {
   }));
 };
 
+const defaultExerciseByLesson: Record<string, Omit<ExerciseData, 'lessonId'>> = {
+  l1: {
+    id: 'fallback-exercise-l1',
+    title: 'Cau hoi tong quan cong nghe web',
+    description: 'Tra loi cac cau hoi co ban ve frontend, backend va cach trinh duyet tai trang web.',
+    type: 'short-answer',
+    timeLimit: 15,
+    questions: [
+      { id: 'fallback-eq-l1-1', question: 'Frontend la phan nao cua ung dung web ma nguoi dung truc tiep tuong tac?', type: 'short-answer', placeholder: 'Nhap cau tra loi ngan...', expectedAnswer: 'giao dien', hints: ['Lien quan den UI nguoi dung nhin thay'], points: 10 },
+      { id: 'fallback-eq-l1-2', question: 'Backend thuong dam nhiem xu ly logic va ... du lieu?', type: 'fill-blank', placeholder: 'Nhap tu con thieu...', expectedAnswer: 'luu tru', hints: ['Dong nghia voi storage'], points: 10 },
+    ],
+  },
+  l2: {
+    id: 'fallback-exercise-l2',
+    title: 'Bai tap HTML co ban',
+    description: 'On tap cau truc trang HTML va cac the co ban.',
+    type: 'fill-blank',
+    timeLimit: 15,
+    questions: [
+      { id: 'fallback-eq-l2-1', question: 'The HTML nao dung de tao doan van ban?', type: 'fill-blank', placeholder: 'Nhap ten the...', expectedAnswer: 'p', hints: ['Viet tat cua paragraph'], points: 10 },
+      { id: 'fallback-eq-l2-2', question: 'Thuoc tinh nao dung de dat duong dan cho the a?', type: 'fill-blank', placeholder: 'Nhap ten thuoc tinh...', expectedAnswer: 'href', hints: ['Chua URL dich'], points: 10 },
+    ],
+  },
+  l3: {
+    id: 'fallback-exercise-l3',
+    title: 'Bai tap CSS co ban',
+    description: 'On tap selector, color va flexbox.',
+    type: 'fill-blank',
+    timeLimit: 20,
+    questions: [
+      { id: 'fallback-eq-l3-1', question: 'Thuoc tinh CSS nao dung de doi mau chu?', type: 'fill-blank', placeholder: 'Nhap ten thuoc tinh...', expectedAnswer: 'color', hints: ['Thuoc tinh doi mau text'], points: 10 },
+      { id: 'fallback-eq-l3-2', question: 'Gia tri nao cua display dung cho Flexbox?', type: 'fill-blank', placeholder: 'Nhap gia tri...', expectedAnswer: 'flex', hints: ['Lien quan bo cuc mot chieu'], points: 10 },
+    ],
+  },
+  l4: {
+    id: 'fallback-exercise-l4',
+    title: 'Bai tap JavaScript',
+    description: 'Viet cac doan code JavaScript nho de cung co kien thuc.',
+    type: 'coding',
+    timeLimit: 30,
+    questions: [
+      { id: 'fallback-eq-l4-1', question: 'Viet ham tinh tong cac so tu 1 den n.', type: 'coding', placeholder: 'function sum(n) {\n  // your code\n}', expectedAnswer: 'for,let,sum,return', hints: ['Dung vong lap for'], points: 20 },
+      { id: 'fallback-eq-l4-2', question: 'Viet ham dao nguoc chuoi.', type: 'coding', placeholder: 'function reverseString(str) {\n  // your code\n}', expectedAnswer: 'split,reverse,join', hints: ['Co the tach chuoi thanh mang'], points: 20 },
+    ],
+  },
+  l5: {
+    id: 'fallback-exercise-l5',
+    title: 'Bai tap React can ban',
+    description: 'Kiem tra kien thuc ve component, props va state.',
+    type: 'short-answer',
+    timeLimit: 20,
+    questions: [
+      { id: 'fallback-eq-l5-1', question: 'Hook nao duoc dung de quan ly state trong function component?', type: 'fill-blank', placeholder: 'Nhap ten hook...', expectedAnswer: 'useState', hints: ['Bat dau bang use'], points: 15 },
+      { id: 'fallback-eq-l5-2', question: 'Props trong React dung de lam gi?', type: 'short-answer', placeholder: 'Nhap cau tra loi...', expectedAnswer: 'truyen du lieu', hints: ['Du lieu di tu component cha xuong con'], points: 15 },
+    ],
+  },
+  l6: {
+    id: 'fallback-exercise-l6',
+    title: 'Cau hoi nhap mon Data Science',
+    description: 'On tap cac khai niem nhap mon ve quy trinh xu ly du lieu.',
+    type: 'short-answer',
+    timeLimit: 15,
+    questions: [
+      { id: 'fallback-eq-l6-1', question: 'Data Science ket hop lap trinh, thong ke va ...?', type: 'fill-blank', placeholder: 'Nhap tu con thieu...', expectedAnswer: 'nghiep vu', hints: ['Hieu biet domain'], points: 10 },
+      { id: 'fallback-eq-l6-2', question: 'Buoc nao thuong duoc dung de tim hieu du lieu truoc khi mo hinh hoa?', type: 'short-answer', placeholder: 'Nhap ten buoc...', expectedAnswer: 'phan tich', hints: ['Thuong goi la exploratory data analysis'], points: 10 },
+    ],
+  },
+  l7: {
+    id: 'fallback-exercise-l7',
+    title: 'Bai tap Python cho Data Analysis',
+    description: 'Luyen tap syntax Python co ban phuc vu phan tich du lieu.',
+    type: 'coding',
+    timeLimit: 25,
+    questions: [
+      { id: 'fallback-eq-l7-1', question: 'Viet ham tinh trung binh cong cua danh sach so.', type: 'coding', placeholder: 'def average(numbers):\n    # your code', expectedAnswer: 'sum,len,return', hints: ['Tong chia cho so luong phan tu'], points: 20 },
+      { id: 'fallback-eq-l7-2', question: 'Viet ham dem so lan xuat hien cua mot ky tu trong chuoi.', type: 'coding', placeholder: 'def count_char(text, ch):\n    # your code', expectedAnswer: 'for,if,return', hints: ['Duyet qua tung ky tu'], points: 20 },
+    ],
+  },
+  l8: {
+    id: 'fallback-exercise-l8',
+    title: 'Bai tap Pandas co ban',
+    description: 'Tra loi cau hoi ve doc file va xem du lieu trong Pandas.',
+    type: 'short-answer',
+    timeLimit: 20,
+    questions: [
+      { id: 'fallback-eq-l8-1', question: 'Ham nao trong Pandas dung de doc file CSV?', type: 'short-answer', placeholder: 'Nhap ten ham...', expectedAnswer: 'read_csv', hints: ['Bat dau bang read_'], points: 15 },
+      { id: 'fallback-eq-l8-2', question: 'Phuong thuc nao dung de xem 5 dong dau tien cua DataFrame?', type: 'short-answer', placeholder: 'Nhap ten phuong thuc...', expectedAnswer: 'head', hints: ['Ten tieng Anh cua dau'], points: 15 },
+    ],
+  },
+  l9: {
+    id: 'fallback-exercise-l9',
+    title: 'Bai tap nhap mon Machine Learning',
+    description: 'On tap cac khai niem regression, classification va tap du lieu.',
+    type: 'short-answer',
+    timeLimit: 20,
+    questions: [
+      { id: 'fallback-eq-l9-1', question: 'Du doan gia nha thuong thuoc regression hay classification?', type: 'short-answer', placeholder: 'Nhap cau tra loi...', expectedAnswer: 'regression', hints: ['Ket qua la gia tri so'], points: 15 },
+      { id: 'fallback-eq-l9-2', question: 'Tap du lieu dung de kiem tra mo hinh sau khi huan luyen goi la gi?', type: 'short-answer', placeholder: 'Nhap ten tap du lieu...', expectedAnswer: 'test', hints: ['Thuong ghep voi tu set'], points: 15 },
+    ],
+  },
+};
+
+const defaultAssignmentByLesson: Record<string, Omit<AssignmentData, 'lessonId'>> = {
+  l1: { id: 'fallback-assignment-l1', title: 'Bao cao tong quan ve Web', description: 'Tom tat vai tro cua frontend, backend va co so du lieu trong mot he thong web.', dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), maxFileSize: 10, allowedFormats: ['.pdf', '.docx', '.pptx'], maxScore: 100 },
+  l2: { id: 'fallback-assignment-l2', title: 'Thuc hanh tao trang HTML ca nhan', description: 'Tao mot trang gioi thieu ban than bang HTML voi tieu de, doan van va lien ket.', dueDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000), maxFileSize: 10, allowedFormats: ['.html', '.zip'], maxScore: 100 },
+  l3: { id: 'fallback-assignment-l3', title: 'Thiet ke landing page bang CSS', description: 'Hoan thien mot landing page voi header, hero, feature va footer.', dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), maxFileSize: 10, allowedFormats: ['.html', '.css', '.zip'], maxScore: 100 },
+  l4: { id: 'fallback-assignment-l4', title: 'Bai tap JavaScript DOM', description: 'Xay dung trang nho thao tac DOM va xu ly su kien bang JavaScript.', dueDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000), maxFileSize: 15, allowedFormats: ['.html', '.js', '.zip'], maxScore: 100 },
+  l5: { id: 'fallback-assignment-l5', title: 'Xay dung Todo App bang React', description: 'Tao ung dung Todo su dung component, props va state.', dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), maxFileSize: 20, allowedFormats: ['.zip', '.rar'], maxScore: 100 },
+  l6: { id: 'fallback-assignment-l6', title: 'Bao cao nhap mon Data Science', description: 'Trinh bay quy trinh Data Science va mot vi du ung dung thuc te.', dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), maxFileSize: 10, allowedFormats: ['.pdf', '.docx'], maxScore: 100 },
+  l7: { id: 'fallback-assignment-l7', title: 'Phan tich du lieu voi Python', description: 'Xu ly mot bo du lieu nho bang Python va trinh bay ket qua.', dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), maxFileSize: 15, allowedFormats: ['.ipynb', '.py', '.zip'], maxScore: 100 },
+  l8: { id: 'fallback-assignment-l8', title: 'Lam sach du lieu voi Pandas', description: 'Doc CSV, xu ly gia tri thieu va xuat bao cao tong hop.', dueDate: new Date(Date.now() + 11 * 24 * 60 * 60 * 1000), maxFileSize: 15, allowedFormats: ['.ipynb', '.py', '.zip'], maxScore: 100 },
+  l9: { id: 'fallback-assignment-l9', title: 'Mini report ve Machine Learning', description: 'Mo ta mot bai toan supervised learning va cach danh gia mo hinh.', dueDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000), maxFileSize: 10, allowedFormats: ['.pdf', '.docx', '.pptx'], maxScore: 100 },
+};
+
 const buildFallbackExercise = (lessonId: string): ExerciseData | null => {
   const fallbackExercise = mockExercises.find(exercise => exercise.lessonId === lessonId);
-  if (!fallbackExercise) return null;
+  if (!fallbackExercise) {
+    const generatedExercise = defaultExerciseByLesson[lessonId];
+    return generatedExercise ? { ...generatedExercise, lessonId } : null;
+  }
 
   return {
     id: fallbackExercise.id,
@@ -174,7 +291,10 @@ const buildFallbackExercise = (lessonId: string): ExerciseData | null => {
 
 const buildFallbackAssignment = (lessonId: string): AssignmentData | null => {
   const fallbackAssignment = mockAssignments.find(assignment => assignment.lessonId === lessonId);
-  if (!fallbackAssignment) return null;
+  if (!fallbackAssignment) {
+    const generatedAssignment = defaultAssignmentByLesson[lessonId];
+    return generatedAssignment ? { ...generatedAssignment, lessonId } : null;
+  }
 
   return {
     id: fallbackAssignment.id,

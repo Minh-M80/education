@@ -73,6 +73,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/quizzes/**").permitAll()
                         .requestMatchers("/api/exercises/**").permitAll()
                         .requestMatchers("/api/assignments/**").permitAll()
+                        .requestMatchers("/api/exercise-submissions/**").permitAll()
+                        .requestMatchers("/api/assignment-submissions/**").permitAll()
                         .requestMatchers("/api/reviews/**").permitAll()
                         .anyRequest().authenticated()
                 );
