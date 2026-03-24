@@ -1,0 +1,13 @@
+tc_name,email,password,expected_status,should_succeed,should_store_token,expected_user_id,expected_email,expected_full_name,expected_error_contains
+Login thanh cong - test user,test@example.com,password123,200,true,true,u1,test@example.com,Test User,
+Login thanh cong - admin,admin@example.com,password123,200,true,true,u2,admin@example.com,Admin User,
+Login thanh cong - student,student@example.com,password123,200,true,true,u3,student@example.com,Student User,
+Sai mat khau,test@example.com,wrongpass,401,false,false,,,,unauthorized
+Email khong ton tai,notfound@example.com,password123,401,false,false,,,,not found
+Email rong,,password123,401,false,false,,,,not found
+Mat khau rong,test@example.com,,401,false,false,,,,bad credentials
+Ca email va mat khau rong,,,401,false,false,,,,not found
+Email sai dinh dang,abc,password123,401,false,false,,,,not found
+Mat khau qua ngan,test@example.com,123,401,false,false,,,,bad credentials
+Email co khoang trang dau cuoi," test@example.com ",password123,401,false,false,,,,not found
+Phan biet chu hoa chu thuong,Test@Example.com,password123,401,false,false,,,,not found

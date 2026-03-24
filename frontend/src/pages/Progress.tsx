@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEnrollment } from '@/contexts/EnrollmentContext';
@@ -56,12 +56,12 @@ const ProgressPage: React.FC = () => {
         <Header />
         <main className="container flex flex-1 items-center justify-center py-20">
           <div className="text-center">
-            <h1 className="mb-4 font-display text-2xl font-bold">Vui lÃ²ng Ä‘Äƒng nháº­p</h1>
+            <h1 className="mb-4 font-display text-2xl font-bold">Vui lòng đăng nhập</h1>
             <p className="mb-6 text-muted-foreground">
-              Báº¡n cáº§n Ä‘Äƒng nháº­p Ä‘á»ƒ xem tiáº¿n Ä‘á»™ há»c táº­p
+              Bạn cần đăng nhập để xem tiến độ học tập
             </p>
             <Button onClick={() => navigate('/login')}>
-              ÄÄƒng nháº­p ngay
+              Đăng nhập ngay
             </Button>
           </div>
         </main>
@@ -77,12 +77,12 @@ const ProgressPage: React.FC = () => {
       <main className="flex-1">
         <section className="border-b border-border bg-muted/30 py-12">
           <div className="container">
-            <Badge className="mb-4">Thá»‘ng kÃª</Badge>
+            <Badge className="mb-4">Thống kê</Badge>
             <h1 className="mb-4 font-display text-3xl font-bold md:text-4xl">
-              Tiáº¿n Ä‘á»™ há»c táº­p
+              Tiến độ học tập
             </h1>
             <p className="max-w-2xl text-muted-foreground">
-              Theo dÃµi tiáº¿n Ä‘á»™ vÃ  thÃ nh tÃ­ch há»c táº­p cá»§a báº¡n.
+              Theo dõi tiến độ và thành tích học tập của bạn.
             </p>
           </div>
         </section>
@@ -99,7 +99,7 @@ const ProgressPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-2xl font-bold">{enrollments.length}</div>
-                        <div className="text-sm text-muted-foreground">KhÃ³a há»c Ä‘Ã£ Ä‘Äƒng kÃ½</div>
+                        <div className="text-sm text-muted-foreground">Khóa học đã đăng ký</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -111,7 +111,7 @@ const ProgressPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-2xl font-bold">{completedCourses}</div>
-                        <div className="text-sm text-muted-foreground">ÄÃ£ hoÃ n thÃ nh</div>
+                        <div className="text-sm text-muted-foreground">Đã hoàn thành</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -123,7 +123,7 @@ const ProgressPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-2xl font-bold">{inProgressCourses}</div>
-                        <div className="text-sm text-muted-foreground">Äang há»c</div>
+                        <div className="text-sm text-muted-foreground">Đang học</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -135,7 +135,7 @@ const ProgressPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-2xl font-bold">{totalProgress}%</div>
-                        <div className="text-sm text-muted-foreground">Tiáº¿n Ä‘á»™ trung bÃ¬nh</div>
+                        <div className="text-sm text-muted-foreground">Tiến độ trung bình</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -145,7 +145,7 @@ const ProgressPage: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <BarChart3 className="h-5 w-5" />
-                      Chi tiáº¿t tiáº¿n Ä‘á»™
+                      Chi tiết tiến độ
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -165,14 +165,14 @@ const ProgressPage: React.FC = () => {
                               <p className="text-sm text-muted-foreground">{course.instructor}</p>
                             </div>
                             <Badge variant={progress >= 100 ? 'default' : 'outline'} className={progress >= 100 ? 'bg-success' : ''}>
-                              {progress >= 100 ? 'HoÃ n thÃ nh' : `${progress}%`}
+                              {progress >= 100 ? 'Hoàn thành' : `${progress}%`}
                             </Badge>
                           </div>
 
                           <div className="space-y-1">
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">
-                                {completedLessons} / {course.totalLessons || 0} bÃ i há»c
+                                {completedLessons} / {course.totalLessons || 0} bài học
                               </span>
                               <span className="font-medium">{progress}%</span>
                             </div>
@@ -184,7 +184,7 @@ const ProgressPage: React.FC = () => {
                             size="sm"
                             onClick={() => navigate(`/courses/${course.id}`)}
                           >
-                            {progress >= 100 ? 'Xem láº¡i' : 'Tiáº¿p tá»¥c há»c'}
+                            {progress >= 100 ? 'Xem lại' : 'Tiếp tục học'}
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
                         </div>
@@ -196,12 +196,12 @@ const ProgressPage: React.FC = () => {
             ) : (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16">
                 <BarChart3 className="mb-4 h-16 w-16 text-muted-foreground" />
-                <h3 className="mb-2 text-xl font-semibold">ChÆ°a cÃ³ dá»¯ liá»‡u</h3>
+                <h3 className="mb-2 text-xl font-semibold">Chưa có dữ liệu</h3>
                 <p className="mb-6 text-center text-muted-foreground">
-                  ÄÄƒng kÃ½ khÃ³a há»c Ä‘á»ƒ báº¯t Ä‘áº§u theo dÃµi tiáº¿n Ä‘á»™ há»c táº­p
+                  Đăng ký khóa học để bắt đầu theo dõi tiến độ học tập
                 </p>
                 <Button onClick={() => navigate('/courses')} className="btn-gradient">
-                  KhÃ¡m phÃ¡ khÃ³a há»c
+                  Khám phá khóa học
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
