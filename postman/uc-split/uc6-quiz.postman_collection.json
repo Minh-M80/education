@@ -1,0 +1,256 @@
+﻿{
+    "info":  {
+                 "_postman_id":  "546f9e9d-4ef2-4d81-b4cd-4b83f6f8ce31",
+                 "name":  "UC6 - Lam bai kiem tra",
+                 "description":  "Use case lay quiz, xem chi tiet va nop bai quiz.",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "variable":  [
+                     {
+                         "key":  "baseUrl",
+                         "value":  "http://localhost:8080"
+                     },
+                     {
+                         "key":  "momoFunctionUrl",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "run_id",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "review_id",
+                         "value":  ""
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "Nop bai quiz",
+                     "event":  [
+                                   {
+                                       "listen":  "prerequest",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "if (!pm.collectionVariables.get(\u0027run_id\u0027)) {",
+                                                                   "    pm.collectionVariables.set(\u0027run_id\u0027, String(Date.now()));",
+                                                                   "}",
+                                                                   "const tcName = pm.iterationData.get(\u0027tc_name\u0027) || \u0027Unnamed testcase\u0027;",
+                                                                   "pm.variables.set(\u0027tc_name\u0027, tcName);",
+                                                                   "console.log(\u0027Preparing testcase:\u0027, tcName);"
+                                                               ]
+                                                  }
+                                   },
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "const row = pm.iterationData.toObject();",
+                                                                   "const tcName = row.tc_name || \u0027Unnamed testcase\u0027;",
+                                                                   "",
+                                                                   "function getValue(name) {",
+                                                                   "    if (row[name] !== undefined \u0026\u0026 row[name] !== null \u0026\u0026 row[name] !== \u0027\u0027) return row[name];",
+                                                                   "    const collectionValue = pm.collectionVariables.get(name);",
+                                                                   "    if (collectionValue !== undefined \u0026\u0026 collectionValue !== null \u0026\u0026 collectionValue !== \u0027\u0027) return collectionValue;",
+                                                                   "    const environmentValue = pm.environment.get(name);",
+                                                                   "    if (environmentValue !== undefined \u0026\u0026 environmentValue !== null \u0026\u0026 environmentValue !== \u0027\u0027) return environmentValue;",
+                                                                   "    const globalValue = pm.globals.get(name);",
+                                                                   "    if (globalValue !== undefined \u0026\u0026 globalValue !== null \u0026\u0026 globalValue !== \u0027\u0027) return globalValue;",
+                                                                   "    return \u0027\u0027;",
+                                                                   "}",
+                                                                   "",
+                                                                   "function render(template) {",
+                                                                   "    if (template === undefined || template === null) return \u0027\u0027;",
+                                                                   "    return String(template).replace(/{{\\s*([^}]+)\\s*}}/g, (_, key) =\u003e {",
+                                                                   "        const value = getValue(key.trim());",
+                                                                   "        return value === undefined || value === null ? \u0027\u0027 : String(value);",
+                                                                   "    });",
+                                                                   "}",
+                                                                   "",
+                                                                   "function deepGet(obj, path) {",
+                                                                   "    return String(path).split(\u0027.\u0027).reduce((acc, part) =\u003e {",
+                                                                   "        if (acc === undefined || acc === null) return undefined;",
+                                                                   "        return acc[part];",
+                                                                   "    }, obj);",
+                                                                   "}",
+                                                                   "",
+                                                                   "function toHeadersMap(headersJson) {",
+                                                                   "    const baseHeaders = { \u0027Content-Type\u0027: \u0027application/json\u0027 };",
+                                                                   "    if (!headersJson) return baseHeaders;",
+                                                                   "    const rendered = render(headersJson);",
+                                                                   "    try {",
+                                                                   "        return Object.assign(baseHeaders, JSON.parse(rendered));",
+                                                                   "    } catch (e) {",
+                                                                   "        console.warn(\u0027Cannot parse headers_json for\u0027, tcName, rendered);",
+                                                                   "        return baseHeaders;",
+                                                                   "    }",
+                                                                   "}",
+                                                                   "",
+                                                                   "const skipVar = row.skip_if_var_missing ? String(row.skip_if_var_missing) : \u0027\u0027;",
+                                                                   "if (skipVar \u0026\u0026 !getValue(skipVar)) {",
+                                                                   "    pm.test(`[${tcName}] skipped because ${skipVar} is missing`, function () {",
+                                                                   "        pm.expect(true).to.eql(true);",
+                                                                   "    });",
+                                                                   "    console.warn(\u0027Skipped testcase due to missing variable:\u0027, skipVar);",
+                                                                   "} else {",
+                                                                   "    const method = String(row.method || \u0027GET\u0027).toUpperCase();",
+                                                                   "    const isAbsolute = String(row.url_mode || \u0027base\u0027).toLowerCase() === \u0027absolute\u0027;",
+                                                                   "    const url = isAbsolute",
+                                                                   "        ? render(row.url_template || \u0027\u0027)",
+                                                                   "        : `${pm.collectionVariables.get(\u0027baseUrl\u0027)}${render(row.path || \u0027\u0027)}`;",
+                                                                   "    const headersMap = toHeadersMap(row.headers_json);",
+                                                                   "    const requestOptions = {",
+                                                                   "        url,",
+                                                                   "        method,",
+                                                                   "        header: Object.keys(headersMap).map(key =\u003e ({ key, value: headersMap[key] }))",
+                                                                   "    };",
+                                                                   "",
+                                                                   "    const bodyRaw = row.body_raw ? render(row.body_raw) : \u0027\u0027;",
+                                                                   "    if (bodyRaw \u0026\u0026 ![\u0027GET\u0027, \u0027DELETE\u0027].includes(method)) {",
+                                                                   "        requestOptions.body = {",
+                                                                   "            mode: \u0027raw\u0027,",
+                                                                   "            raw: bodyRaw",
+                                                                   "        };",
+                                                                   "    }",
+                                                                   "",
+                                                                   "    pm.sendRequest(requestOptions, function (err, res) {",
+                                                                   "        pm.test(`[${tcName}] request succeeds without network error`, function () {",
+                                                                   "            pm.expect(err).to.equal(null);",
+                                                                   "        });",
+                                                                   "",
+                                                                   "        if (err) {",
+                                                                   "            console.error(\u0027Request error:\u0027, err);",
+                                                                   "            return;",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        const expectedStatuses = String(row.expected_statuses || row.expected_status || \u0027200\u0027)",
+                                                                   "            .split(\u0027|\u0027)",
+                                                                   "            .map(item =\u003e Number(String(item).trim()))",
+                                                                   "            .filter(item =\u003e !Number.isNaN(item));",
+                                                                   "",
+                                                                   "        pm.test(`[${tcName}] status code matches expectation`, function () {",
+                                                                   "            pm.expect(expectedStatuses).to.include(res.code);",
+                                                                   "        });",
+                                                                   "",
+                                                                   "        pm.test(`[${tcName}] response time \u003c 8000ms`, function () {",
+                                                                   "            pm.expect(res.responseTime).to.be.below(8000);",
+                                                                   "        });",
+                                                                   "",
+                                                                   "        const responseText = res.text();",
+                                                                   "        const contentType = String(res.headers.get(\u0027Content-Type\u0027) || \u0027\u0027).toLowerCase();",
+                                                                   "        const expectJson = String(row.expect_json || \u0027\u0027).toLowerCase() === \u0027true\u0027;",
+                                                                   "        let responseJson = null;",
+                                                                   "",
+                                                                   "        if (expectJson || contentType.includes(\u0027application/json\u0027)) {",
+                                                                   "            try {",
+                                                                   "                responseJson = res.json();",
+                                                                   "            } catch (e) {",
+                                                                   "                responseJson = null;",
+                                                                   "            }",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        if (String(row.expect_array || \u0027\u0027).toLowerCase() === \u0027true\u0027) {",
+                                                                   "            pm.test(`[${tcName}] response is an array`, function () {",
+                                                                   "                pm.expect(Array.isArray(responseJson)).to.eql(true);",
+                                                                   "            });",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        if (row.expect_array_min !== undefined \u0026\u0026 row.expect_array_min !== null \u0026\u0026 row.expect_array_min !== \u0027\u0027) {",
+                                                                   "            pm.test(`[${tcName}] array length \u003e= ${row.expect_array_min}`, function () {",
+                                                                   "                pm.expect(Array.isArray(responseJson)).to.eql(true);",
+                                                                   "                pm.expect(responseJson.length).to.be.at.least(Number(row.expect_array_min));",
+                                                                   "            });",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        if (row.expected_keys_csv) {",
+                                                                   "            const expectedKeys = String(row.expected_keys_csv).split(\u0027,\u0027).map(item =\u003e item.trim()).filter(Boolean);",
+                                                                   "            pm.test(`[${tcName}] response contains expected keys`, function () {",
+                                                                   "                pm.expect(responseJson).to.be.an(\u0027object\u0027);",
+                                                                   "                expectedKeys.forEach(key =\u003e pm.expect(responseJson).to.have.property(key));",
+                                                                   "            });",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        if (row.expected_text_contains) {",
+                                                                   "            const expectedText = render(row.expected_text_contains).toLowerCase();",
+                                                                   "            pm.test(`[${tcName}] response contains expected text`, function () {",
+                                                                   "                const haystack = (responseText || JSON.stringify(responseJson || {})).toLowerCase();",
+                                                                   "                pm.expect(haystack).to.include(expectedText);",
+                                                                   "            });",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        if (row.expected_field_values_json) {",
+                                                                   "            const renderedExpectations = render(row.expected_field_values_json);",
+                                                                   "            let expectedMap = {};",
+                                                                   "            try {",
+                                                                   "                expectedMap = JSON.parse(renderedExpectations);",
+                                                                   "            } catch (e) {",
+                                                                   "                expectedMap = {};",
+                                                                   "            }",
+                                                                   "            pm.test(`[${tcName}] response fields match expected values`, function () {",
+                                                                   "                Object.keys(expectedMap).forEach(path =\u003e {",
+                                                                   "                    pm.expect(deepGet(responseJson, path)).to.eql(expectedMap[path]);",
+                                                                   "                });",
+                                                                   "            });",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        if (row.save_response_field \u0026\u0026 row.save_to \u0026\u0026 responseJson) {",
+                                                                   "            const savedValue = deepGet(responseJson, row.save_response_field);",
+                                                                   "            if (savedValue !== undefined \u0026\u0026 savedValue !== null) {",
+                                                                   "                pm.collectionVariables.set(String(row.save_to), String(savedValue));",
+                                                                   "                console.log(\u0027Saved collection variable\u0027, row.save_to, savedValue);",
+                                                                   "            }",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        if (row.unset_variable) {",
+                                                                   "            pm.collectionVariables.unset(String(row.unset_variable));",
+                                                                   "        }",
+                                                                   "",
+                                                                   "        console.log({",
+                                                                   "            tcName,",
+                                                                   "            method,",
+                                                                   "            url,",
+                                                                   "            status: res.code,",
+                                                                   "            responseTime: res.responseTime",
+                                                                   "        });",
+                                                                   "    });",
+                                                                   "}"
+                                                               ]
+                                                  }
+                                   }
+                               ],
+                     "request":  {
+                                     "method":  "POST",
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ],
+                                     "url":  {
+                                                 "raw":  "{{baseUrl}}/api/quiz-results",
+                                                 "host":  [
+                                                              "{{baseUrl}}"
+                                                          ],
+                                                 "path":  [
+                                                              "api",
+                                                              "quiz-results"
+                                                          ]
+                                             },
+                                     "description":  "Request mau hien thi dung voi use case. API thuc te van duoc chay theo tung dong CSV bang pm.sendRequest.",
+                                     "body":  {
+                                                  "mode":  "raw",
+                                                  "raw":  "{\n  \"userId\": \"u1\",\n  \"quizId\": \"q1\",\n  \"answers\": [0, 1, 2]\n}",
+                                                  "options":  {
+                                                                  "raw":  {
+                                                                              "language":  "json"
+                                                                          }
+                                                              }
+                                              }
+                                 },
+                     "response":  [
+
+                                  ]
+                 }
+             ]
+}
