@@ -1,0 +1,12 @@
+com\example\educationbackend\controller\component\ReviewControllerComponentTest.class
+com\example\educationbackend\support\AuthRegisterCsvLoader$RegisterCsvCase.class
+com\example\educationbackend\controller\system\AuthFlowSystemTest.class
+com\example\educationbackend\controller\component\EnrollmentControllerComponentTest.class
+com\example\educationbackend\support\AuthRegisterCsvLoader.class
+com\example\educationbackend\controller\component\AuthControllerComponentTest.class
+com\example\educationbackend\controller\integration\CatalogControllerIntegrationTest.class
+com\example\educationbackend\controller\integration\SubmissionAndReviewIntegrationTest.class
+com\example\educationbackend\controller\component\AssessmentControllerComponentTest.class
+com\example\educationbackend\controller\integration\AuthControllerIntegrationTest.class
+com\example\educationbackend\support\IntegrationTestSupport.class
+com\example\educationbackend\controller\integration\ProgressAndEnrollmentIntegrationTest.class
