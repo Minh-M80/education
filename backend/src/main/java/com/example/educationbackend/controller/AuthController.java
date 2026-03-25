@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 public class AuthController {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    private static final Pattern PASSWORD_SPECIAL_CHAR_PATTERN =
+            Pattern.compile(".*[^A-Za-z0-9].*");
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -87,16 +89,41 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User signUpRequest) {
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            throw new BadRequestException("Email is already in use");
+        String email = signUpRequest.getEmail();
+        String password = signUpRequest.getPassword();
+        String fullName = signUpRequest.getFullName();
+
+        if (isBlank(email) && isBlank(password)) {
+            throw new BadRequestException("Ca email va mat khau khong duoc de trong");
+        }
+        if (isBlank(email)) {
+            throw new BadRequestException("Email khong duoc de trong");
+        }
+        if (isBlank(password)) {
+            throw new BadRequestException("Mat khau khong duoc de trong");
+        }
+        if (isBlank(fullName)) {
+            throw new BadRequestException("Ho ten khong duoc de trong");
+        }
+        if (!email.equals(email.trim())) {
+            throw new BadRequestException("Email khong duoc co khoang trang o dau hoac cuoi");
+        }
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            throw new BadRequestException("Email sai dinh dang");
+        }
+        if (password.length() < 6 || !PASSWORD_SPECIAL_CHAR_PATTERN.matcher(password).matches()) {
+            throw new BadRequestException("Mat khau phai co it nhat 6 ky tu va chua ky tu dac biet");
+        }
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
+            throw new BadRequestException("Email da duoc su dung");
         }
 
         // Create new user's account
         User user = new User();
         user.setId(UUID.randomUUID().toString());
-        user.setEmail(signUpRequest.getEmail());
-        user.setFullName(signUpRequest.getFullName());
-        user.setPassword(signUpRequest.getPassword()); // Real prod should encode
+        user.setEmail(email);
+        user.setFullName(fullName.trim());
+        user.setPassword(password); // Real prod should encode
         
         userRepository.save(user);
 
