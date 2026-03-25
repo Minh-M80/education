@@ -12,7 +12,11 @@
                      },
                      {
                          "key":  "momoFunctionUrl",
-                         "value":  ""
+                         "value":  "https://dywwlgftobeqmklvjbfa.supabase.co/functions/v1/momo-payment"
+                     },
+                     {
+                         "key":  "supabaseAnonKey",
+                         "value":  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5d3dsZ2Z0b2JlcW1rbHZqYmZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTAwODUsImV4cCI6MjA4NTg2NjA4NX0.p1-eZGbO84w0JR4YTkVjpYVnxIsDdLgYVXGw_ZgB714"
                      },
                      {
                          "key":  "run_id",
@@ -77,6 +81,11 @@
                                                                    "",
                                                                    "function toHeadersMap(headersJson) {",
                                                                    "    const baseHeaders = { \u0027Content-Type\u0027: \u0027application/json\u0027 };",
+                                                                   "    const supabaseAnonKey = getValue(\u0027supabaseAnonKey\u0027);",
+                                                                   "    if (supabaseAnonKey) {",
+                                                                   "        baseHeaders.apikey = supabaseAnonKey;",
+                                                                   "        baseHeaders.Authorization = `Bearer ${supabaseAnonKey}`;",
+                                                                   "    }",
                                                                    "    if (!headersJson) return baseHeaders;",
                                                                    "    const rendered = render(headersJson);",
                                                                    "    try {",

@@ -3,9 +3,11 @@ com\example\educationbackend\security\JwtUtils.class
 com\example\educationbackend\model\AssignmentSubmission.class
 com\example\educationbackend\controller\AuthController.class
 com\example\educationbackend\repository\AssignmentSubmissionRepository.class
+com\example\educationbackend\exception\ResourceNotFoundException.class
 com\example\educationbackend\repository\CourseRepository.class
 com\example\educationbackend\dto\JwtResponse.class
 com\example\educationbackend\dto\ExerciseResponse.class
+com\example\educationbackend\exception\BadRequestException.class
 com\example\educationbackend\model\User.class
 com\example\educationbackend\repository\LessonRepository.class
 com\example\educationbackend\model\Course.class
@@ -22,9 +24,11 @@ com\example\educationbackend\model\ExerciseQuestion.class
 com\example\educationbackend\repository\ReviewRepository.class
 com\example\educationbackend\security\UserDetailsServiceImpl.class
 com\example\educationbackend\dto\LoginRequest.class
+com\example\educationbackend\exception\GlobalExceptionHandler.class
 com\example\educationbackend\controller\EnrollmentController.class
 com\example\educationbackend\controller\LessonController.class
 com\example\educationbackend\dto\ExerciseQuestionResponse.class
+com\example\educationbackend\exception\ApiErrorResponse.class
 com\example\educationbackend\repository\ExerciseSubmissionRepository.class
 com\example\educationbackend\repository\UserRepository.class
 com\example\educationbackend\security\AuthTokenFilter.class

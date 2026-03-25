@@ -2,6 +2,8 @@ package com.example.educationbackend.controller;
 
 import com.example.educationbackend.dto.JwtResponse;
 import com.example.educationbackend.dto.LoginRequest;
+import com.example.educationbackend.exception.BadRequestException;
+import com.example.educationbackend.exception.ResourceNotFoundException;
 import com.example.educationbackend.model.User;
 import com.example.educationbackend.repository.UserRepository;
 import com.example.educationbackend.security.JwtUtils;
@@ -45,15 +47,13 @@ public class AuthController {
             return ResponseEntity.ok(new JwtResponse(jwt, user.getId(), user.getEmail(), user.getFullName()));
         }
         
-        return ResponseEntity.badRequest().body("Error: User not found.");
+        throw new ResourceNotFoundException("User not found");
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Error: Email is already in use!");
+            throw new BadRequestException("Email is already in use");
         }
 
         // Create new user's account

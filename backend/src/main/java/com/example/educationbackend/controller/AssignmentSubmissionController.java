@@ -1,5 +1,7 @@
 package com.example.educationbackend.controller;
 
+import com.example.educationbackend.exception.BadRequestException;
+import com.example.educationbackend.exception.ResourceNotFoundException;
 import com.example.educationbackend.model.Assignment;
 import com.example.educationbackend.model.AssignmentSubmission;
 import com.example.educationbackend.repository.AssignmentRepository;
@@ -33,12 +35,12 @@ public class AssignmentSubmissionController {
         Object fileSizeObj = request.get("fileSize");
 
         if (userId == null || assignmentId == null || fileName == null || fileSizeObj == null) {
-            return ResponseEntity.badRequest().body("Thiếu userId, assignmentId, fileName hoặc fileSize");
+            throw new BadRequestException("Thiếu userId, assignmentId, fileName hoặc fileSize");
         }
 
         Optional<Assignment> assignmentOpt = assignmentRepository.findById(assignmentId);
         if (assignmentOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException("Assignment not found");
         }
 
         long fileSize = fileSizeObj instanceof Number
@@ -80,7 +82,7 @@ public class AssignmentSubmissionController {
         return assignmentSubmissionRepository
                 .findTopByUserIdAndAssignmentIdOrderBySubmittedAtDesc(userId, assignmentId)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Assignment submission not found"));
     }
 
     private String buildFeedback(int grade) {

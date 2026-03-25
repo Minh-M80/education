@@ -1,5 +1,7 @@
 package com.example.educationbackend.controller;
 
+import com.example.educationbackend.exception.BadRequestException;
+import com.example.educationbackend.exception.ResourceNotFoundException;
 import com.example.educationbackend.model.Exercise;
 import com.example.educationbackend.model.ExerciseSubmission;
 import com.example.educationbackend.repository.ExerciseRepository;
@@ -39,12 +41,16 @@ public class ExerciseSubmissionController {
         Object timeSpentObj = request.get("timeSpent");
 
         if (userId == null || exerciseId == null || answersObj == null || totalScoreObj == null || maxScoreObj == null) {
-            return ResponseEntity.badRequest().body("Thiếu userId, exerciseId, answers, totalScore hoặc maxScore");
+            throw new BadRequestException("Thiếu userId, exerciseId, answers, totalScore hoặc maxScore");
+        }
+
+        if (!(totalScoreObj instanceof Number) || !(maxScoreObj instanceof Number)) {
+            throw new BadRequestException("totalScore và maxScore phải là số");
         }
 
         Optional<Exercise> exerciseOpt = exerciseRepository.findById(exerciseId);
         if (exerciseOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException("Exercise not found");
         }
 
         ExerciseSubmission submission = new ExerciseSubmission();
@@ -84,6 +90,6 @@ public class ExerciseSubmissionController {
         return exerciseSubmissionRepository
                 .findTopByUserIdAndExerciseIdOrderBySubmittedAtDesc(userId, exerciseId)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise submission not found"));
     }
 }

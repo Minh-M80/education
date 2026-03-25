@@ -1,5 +1,6 @@
 package com.example.educationbackend.controller;
 
+import com.example.educationbackend.exception.ResourceNotFoundException;
 import com.example.educationbackend.model.Lesson;
 import com.example.educationbackend.repository.LessonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,6 @@ public class LessonController {
     public ResponseEntity<Lesson> getLessonById(@PathVariable String lessonId) {
         return lessonRepository.findById(lessonId)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
     }
 }

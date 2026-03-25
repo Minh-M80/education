@@ -4,8 +4,10 @@ D:\Downloads\education\backend\src\main\java\com\example\educationbackend\reposi
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\AssignmentController.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\AuthController.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\security\AuthTokenFilter.java
+D:\Downloads\education\backend\src\main\java\com\example\educationbackend\exception\ResourceNotFoundException.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\dto\LoginRequest.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\EnrollmentController.java
+D:\Downloads\education\backend\src\main\java\com\example\educationbackend\exception\GlobalExceptionHandler.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\model\Review.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\security\UserDetailsServiceImpl.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\QuizResultController.java
@@ -29,6 +31,7 @@ D:\Downloads\education\backend\src\main\java\com\example\educationbackend\reposi
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\EducationBackendApplication.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\dto\JwtResponse.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\model\LessonProgress.java
+D:\Downloads\education\backend\src\main\java\com\example\educationbackend\exception\BadRequestException.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\repository\EnrollmentRepository.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\model\QuizResult.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\model\Quiz.java
@@ -45,5 +48,6 @@ D:\Downloads\education\backend\src\main\java\com\example\educationbackend\reposi
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\ExerciseSubmissionController.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\model\ExerciseSubmission.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\repository\LessonProgressRepository.java
+D:\Downloads\education\backend\src\main\java\com\example\educationbackend\exception\ApiErrorResponse.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\model\Course.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\ReviewController.java

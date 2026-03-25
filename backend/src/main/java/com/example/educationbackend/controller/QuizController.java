@@ -1,5 +1,6 @@
 package com.example.educationbackend.controller;
 
+import com.example.educationbackend.exception.ResourceNotFoundException;
 import com.example.educationbackend.model.Quiz;
 import com.example.educationbackend.repository.QuizQuestionRepository;
 import com.example.educationbackend.repository.QuizRepository;
@@ -44,7 +45,7 @@ public class QuizController {
     public ResponseEntity<Quiz> getQuizById(@PathVariable String quizId) {
         Optional<Quiz> quizOpt = quizRepository.findById(quizId);
         if (quizOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException("Quiz not found");
         }
         Quiz quiz = quizOpt.get();
         quiz.setQuestions(quizQuestionRepository.findByQuizId(quizId));

@@ -2,6 +2,7 @@ package com.example.educationbackend.controller;
 
 import com.example.educationbackend.dto.ExerciseQuestionResponse;
 import com.example.educationbackend.dto.ExerciseResponse;
+import com.example.educationbackend.exception.ResourceNotFoundException;
 import com.example.educationbackend.model.Exercise;
 import com.example.educationbackend.model.ExerciseQuestion;
 import com.example.educationbackend.repository.ExerciseQuestionRepository;
@@ -43,7 +44,7 @@ public class ExerciseController {
     public ResponseEntity<ExerciseResponse> getExerciseById(@PathVariable String exerciseId) {
         Optional<Exercise> exerciseOpt = exerciseRepository.findById(exerciseId);
         return exerciseOpt.map(exercise -> ResponseEntity.ok(toResponse(exercise)))
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise not found"));
     }
 
     private ExerciseResponse toResponse(Exercise exercise) {

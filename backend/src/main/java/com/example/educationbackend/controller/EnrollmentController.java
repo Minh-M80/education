@@ -1,5 +1,7 @@
 package com.example.educationbackend.controller;
 
+import com.example.educationbackend.exception.BadRequestException;
+import com.example.educationbackend.exception.ResourceNotFoundException;
 import com.example.educationbackend.model.Enrollment;
 import com.example.educationbackend.repository.EnrollmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,7 @@ public class EnrollmentController {
     public ResponseEntity<?> enrollUser(@RequestBody Enrollment request) {
         // Simple check
         if (enrollmentRepository.findByUserIdAndCourseId(request.getUserId(), request.getCourseId()).isPresent()) {
-            return ResponseEntity.badRequest().body("User is already enrolled in this course");
+            throw new BadRequestException("User is already enrolled in this course");
         }
 
         request.setId(UUID.randomUUID().toString());
@@ -50,7 +52,7 @@ public class EnrollmentController {
         
         Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByUserIdAndCourseId(userId, courseId);
         if (enrollmentOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException("Enrollment not found");
         }
 
         Enrollment enrollment = enrollmentOpt.get();
