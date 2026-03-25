@@ -241,7 +241,7 @@
                                      "description":  "Request mau hien thi dung voi use case. API thuc te van duoc chay theo tung dong CSV bang pm.sendRequest.",
                                      "body":  {
                                                   "mode":  "raw",
-                                                  "raw":  "{\n  \"email\": \"uc1_{{run_id}}@example.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"UC1 User {{run_id}}\"\n}",
+                                                  "raw":  "{\n  \"email\": \"pf_uc1_a_{{run_id}}@example.com\",\n  \"password\": \"Pass@123\",\n  \"fullName\": \"PF UC1 A {{run_id}}\"\n}",
                                                   "options":  {
                                                                   "raw":  {
                                                                               "language":  "json"
