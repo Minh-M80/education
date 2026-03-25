@@ -40,6 +40,7 @@ D:\Downloads\education\backend\src\main\java\com\example\educationbackend\reposi
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\dto\ExerciseResponse.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\security\WebSecurityConfig.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\QuizController.java
+D:\Downloads\education\backend\src\main\java\com\example\educationbackend\exception\UnauthorizedException.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\repository\QuizResultRepository.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\controller\AssignmentSubmissionController.java
 D:\Downloads\education\backend\src\main\java\com\example\educationbackend\repository\CourseRepository.java

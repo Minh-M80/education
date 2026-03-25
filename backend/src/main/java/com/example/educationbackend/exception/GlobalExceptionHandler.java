@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
+            UnauthorizedException.class,
             BadCredentialsException.class,
             UsernameNotFoundException.class
     })

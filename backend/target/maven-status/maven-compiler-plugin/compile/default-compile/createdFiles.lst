@@ -14,6 +14,7 @@ com\example\educationbackend\model\Course.class
 com\example\educationbackend\controller\ExerciseController$1.class
 com\example\educationbackend\repository\EnrollmentRepository.class
 com\example\educationbackend\model\Lesson.class
+com\example\educationbackend\exception\UnauthorizedException.class
 com\example\educationbackend\security\WebSecurityConfig$1.class
 com\example\educationbackend\repository\ExerciseQuestionRepository.class
 com\example\educationbackend\controller\AssignmentSubmissionController.class
