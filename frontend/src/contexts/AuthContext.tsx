@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { User } from '@/types/lms';
 
 interface AuthContextType {
@@ -11,11 +11,31 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const parseApiErrorMessage = async (response: Response, fallbackMessage: string): Promise<string> => {
+  const raw = await response.text();
+
+  if (!raw) {
+    return fallbackMessage;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as { message?: string };
+    if (typeof parsed.message === 'string' && parsed.message.trim()) {
+      return parsed.message;
+    }
+  } catch {
+    // Keep the raw text when the backend does not return JSON.
+  }
+
+  return raw;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('lms_user');
     return saved ? JSON.parse(saved) : null;
   });
+
   const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const response = await fetch('http://localhost:8080/api/auth/login', {
@@ -32,17 +52,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           fullName: data.fullName,
           createdAt: new Date(),
         };
+
         setUser(loggedInUser);
         localStorage.setItem('lms_user', JSON.stringify(loggedInUser));
         localStorage.setItem('lms_token', data.token);
         return { success: true };
-      } else {
-        const text = await response.text();
-        return { success: false, error: text || 'Đăng nhập thất bại' };
       }
+
+      return { success: false, error: await parseApiErrorMessage(response, 'Dang nhap that bai') };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.' };
+      return { success: false, error: 'Khong the ket noi den may chu. Vui long thu lai sau.' };
     }
   }, []);
 
@@ -56,13 +76,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.ok) {
         return { success: true };
-      } else {
-        const text = await response.text();
-        return { success: false, error: text || 'Đăng ký thất bại' };
       }
+
+      return { success: false, error: await parseApiErrorMessage(response, 'Dang ky that bai') };
     } catch (error) {
       console.error('Registration error:', error);
-      return { success: false, error: 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.' };
+      return { success: false, error: 'Khong the ket noi den may chu. Vui long thu lai sau.' };
     }
   }, []);
 

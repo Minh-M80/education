@@ -1,0 +1,186 @@
+{
+  "info": {
+    "_postman_id": "9e035154-18f8-4ef6-b6c4-3ca14cf29f3e",
+    "name": "Education Backend - Login Testcases",
+    "description": "Collection test API dang nhap cho du an education backend. Chay cung file data CSV trong Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const tcName = pm.iterationData.get('tc_name') || 'Manual run';",
+          "pm.variables.set('tc_name', tcName);",
+          "console.log('Running testcase:', tcName);"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "bearer_token",
+      "value": ""
+    },
+    {
+      "key": "last_login_user_id",
+      "value": ""
+    },
+    {
+      "key": "last_login_email",
+      "value": ""
+    },
+    {
+      "key": "last_login_full_name",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth - Login Data Driven",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const tcName = pm.iterationData.get('tc_name') || 'Unnamed testcase';",
+              "const expectedStatus = Number(pm.iterationData.get('expected_status'));",
+              "const shouldSucceed = String(pm.iterationData.get('should_succeed')).toLowerCase() === 'true';",
+              "const shouldStoreToken = String(pm.iterationData.get('should_store_token')).toLowerCase() === 'true';",
+              "const expectedErrorContains = pm.iterationData.get('expected_error_contains');",
+              "const expectedUserId = pm.iterationData.get('expected_user_id');",
+              "const expectedEmail = pm.iterationData.get('expected_email');",
+              "const expectedFullName = pm.iterationData.get('expected_full_name');",
+              "",
+              "function normalizeText(value) {",
+              "    return String(value || '')",
+              "        .normalize('NFD')",
+              "        .replace(/[\\u0300-\\u036f]/g, '')",
+              "        .toLowerCase()",
+              "        .trim();",
+              "}",
+              "",
+              "pm.test(`[${tcName}] Status code = ${expectedStatus}`, function () {",
+              "    pm.response.to.have.status(expectedStatus);",
+              "});",
+              "",
+              "pm.test(`[${tcName}] Response time < 5000ms`, function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "});",
+              "",
+              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();",
+              "const isJson = contentType.includes('application/json');",
+              "let responseBody = null;",
+              "let responseText = pm.response.text();",
+              "",
+              "if (isJson) {",
+              "    responseBody = pm.response.json();",
+              "}",
+              "",
+              "const responseMessage = responseBody && responseBody.message ? String(responseBody.message) : responseText;",
+              "",
+              "if (shouldSucceed) {",
+              "    pm.test(`[${tcName}] Response is JSON`, function () {",
+              "        pm.expect(isJson).to.eql(true);",
+              "    });",
+              "",
+              "    pm.test(`[${tcName}] Success payload has token and user fields`, function () {",
+              "        pm.expect(responseBody).to.be.an('object');",
+              "        pm.expect(responseBody.token).to.be.a('string').and.not.empty;",
+              "        pm.expect(responseBody.id).to.be.a('string').and.not.empty;",
+              "        pm.expect(responseBody.email).to.be.a('string').and.not.empty;",
+              "        pm.expect(responseBody.fullName).to.be.a('string').and.not.empty;",
+              "    });",
+              "",
+              "    if (expectedUserId) {",
+              "        pm.test(`[${tcName}] user id dung voi du lieu mong doi`, function () {",
+              "            pm.expect(responseBody.id).to.eql(expectedUserId);",
+              "        });",
+              "    }",
+              "",
+              "    if (expectedEmail) {",
+              "        pm.test(`[${tcName}] email dung voi du lieu mong doi`, function () {",
+              "            pm.expect(responseBody.email).to.eql(expectedEmail);",
+              "        });",
+              "    }",
+              "",
+              "    if (expectedFullName) {",
+              "        pm.test(`[${tcName}] fullName dung voi du lieu mong doi`, function () {",
+              "            pm.expect(responseBody.fullName).to.eql(expectedFullName);",
+              "        });",
+              "    }",
+              "",
+              "    if (shouldStoreToken) {",
+              "        pm.collectionVariables.set('bearer_token', responseBody.token);",
+              "        pm.collectionVariables.set('last_login_user_id', responseBody.id);",
+              "        pm.collectionVariables.set('last_login_email', responseBody.email);",
+              "        pm.collectionVariables.set('last_login_full_name', responseBody.fullName);",
+              "    }",
+              "} else {",
+              "    pm.test(`[${tcName}] Request phai that bai`, function () {",
+              "        pm.expect(pm.response.code).to.be.at.least(400);",
+              "    });",
+              "",
+              "    if (expectedErrorContains) {",
+              "        pm.test(`[${tcName}] Loi tra ve chua noi dung mong doi`, function () {",
+              "            const normalizedText = normalizeText(responseMessage);",
+              "            pm.expect(normalizedText).to.include(normalizeText(expectedErrorContains));",
+              "        });",
+              "    }",
+              "",
+              "    pm.collectionVariables.unset('bearer_token');",
+              "    pm.collectionVariables.unset('last_login_user_id');",
+              "    pm.collectionVariables.unset('last_login_email');",
+              "    pm.collectionVariables.unset('last_login_full_name');",
+              "}",
+              "",
+              "console.log({",
+              "    tcName,",
+              "    status: pm.response.code,",
+              "    shouldSucceed,",
+              "    responseTime: pm.response.responseTime",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Dang nhap theo tung dong du lieu trong file CSV."
+      },
+      "response": []
+    }
+  ]
+}

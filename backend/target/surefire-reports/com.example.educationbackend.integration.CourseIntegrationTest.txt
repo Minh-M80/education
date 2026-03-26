@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.example.educationbackend.integration.CourseIntegrationTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.626 s -- in com.example.educationbackend.integration.CourseIntegrationTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.549 s -- in com.example.educationbackend.integration.CourseIntegrationTest
