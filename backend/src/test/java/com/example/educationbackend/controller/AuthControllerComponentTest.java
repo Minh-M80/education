@@ -10,13 +10,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+
+import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,9 +40,13 @@ class AuthControllerComponentTest {
     @MockBean
     private JwtUtils jwtUtils;
 
+    @MockBean
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void registerEndpoint_returnsSuccessMessage_whenPayloadIsValid() throws Exception {
         when(userRepository.findByEmailIgnoreCase("component@example.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("Secret@1")).thenReturn("encoded-component-secret");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -53,6 +60,9 @@ class AuthControllerComponentTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("User registered successfully!"));
 
-        verify(userRepository).save(any(User.class));
+        ArgumentCaptor<User> savedUserCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(savedUserCaptor.capture());
+        verify(passwordEncoder).encode("Secret@1");
+        assertThat(savedUserCaptor.getValue().getPassword()).isEqualTo("encoded-component-secret");
     }
 }

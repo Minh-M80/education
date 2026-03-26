@@ -1,0 +1,4 @@
+com\example\educationbackend\controller\AuthControllerComponentTest.class
+com\example\educationbackend\system\AuthSystemTest.class
+com\example\educationbackend\controller\AuthAndCourseUnitTest.class
+com\example\educationbackend\integration\CourseIntegrationTest.class

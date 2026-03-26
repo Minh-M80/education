@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
@@ -31,6 +32,9 @@ class AuthSystemTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
@@ -38,7 +42,7 @@ class AuthSystemTest {
         User user = new User();
         user.setId("system-user-1");
         user.setEmail("system@example.com");
-        user.setPassword("Secret@1");
+        user.setPassword(passwordEncoder.encode("Secret@1"));
         user.setFullName("System User");
         userRepository.save(user);
     }

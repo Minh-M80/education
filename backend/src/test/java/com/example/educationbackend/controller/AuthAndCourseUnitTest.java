@@ -17,13 +17,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.mockito.ArgumentCaptor;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +42,9 @@ class AuthAndCourseUnitTest {
 
     @Mock
     private JwtUtils jwtUtils;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @Mock
     private CourseRepository courseRepository;
@@ -94,11 +101,19 @@ class AuthAndCourseUnitTest {
         newUser.setPassword("Secret@1");
         newUser.setFullName("New User");
 
+        when(userRepository.findByEmailIgnoreCase("newuser@example.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("Secret@1")).thenReturn("encoded-secret");
+
         ResponseEntity<?> response = authController.registerUser(newUser);
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         assertThat(response.getBody()).isEqualTo("User registered successfully!");
-        verify(userRepository).save(any(User.class));
+
+        ArgumentCaptor<User> savedUserCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(savedUserCaptor.capture());
+        verify(passwordEncoder).encode(eq("Secret@1"));
+        assertThat(savedUserCaptor.getValue().getPassword()).isEqualTo("encoded-secret");
+        assertThat(savedUserCaptor.getValue().getPassword()).isNotEqualTo("Secret@1");
     }
 
     @Test
