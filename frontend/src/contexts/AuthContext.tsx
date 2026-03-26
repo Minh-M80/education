@@ -11,7 +11,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const parseAuthError = async (response: Response, fallbackMessage: string): Promise<string> => {
+const parseApiErrorMessage = async (response: Response, fallbackMessage: string): Promise<string> => {
   const raw = await response.text();
 
   if (!raw) {
@@ -24,7 +24,7 @@ const parseAuthError = async (response: Response, fallbackMessage: string): Prom
       return parsed.message;
     }
   } catch {
-    // Fall back to the raw body when the backend returns plain text.
+    // Keep the raw text when the backend does not return JSON.
   }
 
   return raw;
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: true };
       }
 
-      return { success: false, error: await parseAuthError(response, 'Dang nhap that bai') };
+      return { success: false, error: await parseApiErrorMessage(response, 'Dang nhap that bai') };
     } catch (error) {
       console.error('Login error:', error);
       return { success: false, error: 'Khong the ket noi den may chu. Vui long thu lai sau.' };
@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: true };
       }
 
-      return { success: false, error: await parseAuthError(response, 'Dang ky that bai') };
+      return { success: false, error: await parseApiErrorMessage(response, 'Dang ky that bai') };
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, error: 'Khong the ket noi den may chu. Vui long thu lai sau.' };
